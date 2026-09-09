@@ -11,6 +11,10 @@ Please note that about one-third of this size is dedicated to the 46 predefined 
 
 ![Demo Light](doc/jsonViewer_light.png)
 
+## This fork
+
+- Added in-line array pagination
+
 ## Demo
 
 For a live demonstration of **json-viewer**, please visit our [demo](https://pfau-software.de/json-viewer/demo/).
