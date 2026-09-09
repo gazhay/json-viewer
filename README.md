@@ -183,6 +183,8 @@ export default JsonViewer
 | `preserveExpanded` (`preserve-expanded`) | Boolean                     | false           | Whether to preserve the expanded/collapsed state of nodes when the data is updated.                                                                                                   |
 | `data`                                | Stringified JSON or URL String | (Not specified) | The JSON data to be visualized. You can provide it as a stringified JSON or a URL string. Alternatively, you can pass the data via the API as an object or as content within the tag. |
 
+`arrayPageSize` controls how many array items are rendered on each inline page. It defaults to `10` and can be set with the `array-page-size` attribute or the `arrayPageSize` property.
+
 ## Toolbar Functions
 
 If the toolbar is enabled, users have access to the following functions:

@@ -22,7 +22,7 @@ function Container(root, options = {}) {
   // Create search optimizer for better search performance
   const searchOptimizer = new SearchOptimizer()
 
-  this.update = ({ data, expanded, indent, expandIconType, showDataTypes, showToolbar, showSize, showCopy, preserveExpanded, expandEmpty, copyWithKey }) => {
+  this.update = ({ data, expanded, indent, expandIconType, showDataTypes, showToolbar, showSize, showCopy, preserveExpanded, expandEmpty, copyWithKey, arrayPageSize }) => {
     // Handle preserveExpanded option
     if (preserveExpanded !== undefined) {
       cache.preserveExpanded = preserveExpanded
@@ -61,6 +61,7 @@ function Container(root, options = {}) {
           expanded,
           indent,
           expandEmpty: cache.expandEmpty !== undefined ? cache.expandEmpty : true,
+          arrayPageSize: arrayPageSize || 10,
           tooltipPool,
           searchOptimizer,
           onToggleExpand: (level) => {

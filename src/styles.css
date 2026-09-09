@@ -125,6 +125,34 @@
   align-items: center;
 }
 
+.inline-pagination-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  font-size: 0.85em;
+}
+
+.inline-pagination-controls button {
+  padding: 1px 5px;
+  border: 1px solid var(--base03);
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.inline-pagination-controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.page-indicator {
+  font-family: monospace;
+  white-space: nowrap;
+}
+
 .data-row .key {
   color: var(--base07);
 }

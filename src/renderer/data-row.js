@@ -1,6 +1,6 @@
 import { dataType, escapeHtml } from "../data-helpers"
 
-const DataRow = function ({ key, value, expanded, indent, onToggleExpand, level = 0, parentRow, path = "", expandedPaths = null, onPathToggle = null, expandEmpty = true, tooltipPool = null, searchOptimizer = null }) {
+const DataRow = function ({ key, value, expanded, indent, onToggleExpand, level = 0, parentRow, path = "", expandedPaths = null, onPathToggle = null, expandEmpty = true, arrayPageSize = 10, tooltipPool = null, searchOptimizer = null }) {
   const row = document.createElement("div")
   this.maxLevel = level
 
@@ -27,6 +27,8 @@ const DataRow = function ({ key, value, expanded, indent, onToggleExpand, level 
   }
 
   let expandIcon, childrenRows, keyEl, valueEl
+  let currentPage = 1
+  const pageSize = Math.max(1, Math.floor(arrayPageSize))
 
   // ROW CONTAINER
   row.className = `data-row ${isExpanded ? "expanded" : ""}`
@@ -196,31 +198,6 @@ const DataRow = function ({ key, value, expanded, indent, onToggleExpand, level 
     itemsSize.textContent = `${length} item${length === 1 ? "" : "s"}`
     keyValueWrapper.appendChild(itemsSize)
 
-    // CHILDREN ROWS
-    childrenRows = []
-
-    const items = thisDataType === "array" ? value.map((v, i) => i) : Object.keys(value)
-    items.forEach((key) => {
-      const subRow = new DataRow({
-        key,
-        value: value[key],
-        expanded,
-        indent,
-        expandEmpty,
-        onToggleExpand,
-        level: level + 1,
-        parentRow: row,
-        path: currentPath,
-        expandedPaths,
-        onPathToggle,
-        tooltipPool,
-        searchOptimizer,
-      })
-      childrenRows.push(subRow)
-      row.appendChild(subRow.element)
-      this.maxLevel = Math.max(this.maxLevel, subRow.maxLevel)
-    })
-
     // EXPANDED CLOSING PARENTHESIS
     const expandedClosingParenthesis = document.createElement("span")
     expandedClosingParenthesis.className = "closing-parenthesis"
@@ -238,7 +215,89 @@ const DataRow = function ({ key, value, expanded, indent, onToggleExpand, level 
       })
     }
 
+    const totalPages = thisDataType === "array" ? Math.ceil(value.length / pageSize) : 1
+    let pageIndicator
+    let previousButton
+    let nextButton
+
+    const renderChildren = () => {
+      if (childrenRows) childrenRows.forEach((childRow) => childRow.element.remove())
+      childrenRows = []
+
+      const startIndex = thisDataType === "array" ? (currentPage - 1) * pageSize : 0
+      const endIndex = thisDataType === "array" ? Math.min(startIndex + pageSize, value.length) : undefined
+      const items = thisDataType === "array"
+        ? value.slice(startIndex, endIndex).map((item, index) => startIndex + index)
+        : Object.keys(value)
+
+      items.forEach((childKey) => {
+        const subRow = new DataRow({
+          key: childKey,
+          value: value[childKey],
+          expanded,
+          indent,
+          expandEmpty,
+          arrayPageSize,
+          onToggleExpand,
+          level: level + 1,
+          parentRow: row,
+          path: currentPath,
+          expandedPaths,
+          onPathToggle,
+          tooltipPool,
+          searchOptimizer,
+        })
+        childrenRows.push(subRow)
+        row.insertBefore(subRow.element, expandedClosingParenthesis)
+        this.maxLevel = Math.max(this.maxLevel, subRow.maxLevel)
+      })
+    }
+
+    if (thisDataType === "array" && totalPages > 1) {
+      const pagination = document.createElement("span")
+      pagination.className = "inline-pagination-controls"
+
+      previousButton = document.createElement("button")
+      previousButton.type = "button"
+      previousButton.textContent = "Prev"
+      previousButton.addEventListener("click", () => {
+        if (currentPage > 1) {
+          currentPage -= 1
+          renderChildren()
+          updatePagination()
+        }
+      })
+
+      pageIndicator = document.createElement("span")
+      pageIndicator.className = "page-indicator"
+
+      nextButton = document.createElement("button")
+      nextButton.type = "button"
+      nextButton.textContent = "Next"
+      nextButton.addEventListener("click", () => {
+        if (currentPage < totalPages) {
+          currentPage += 1
+          renderChildren()
+          updatePagination()
+        }
+      })
+
+      pagination.append(previousButton, pageIndicator, nextButton)
+      keyValueWrapper.appendChild(pagination)
+    }
+
+    const updatePagination = () => {
+      if (!pageIndicator) return
+      const startIndex = (currentPage - 1) * pageSize
+      const endIndex = Math.min(startIndex + pageSize, value.length)
+      pageIndicator.textContent = `Items ${startIndex + 1}-${endIndex} of ${value.length} (Page ${currentPage}/${totalPages})`
+      previousButton.disabled = currentPage === 1
+      nextButton.disabled = currentPage === totalPages
+    }
+
     row.appendChild(expandedClosingParenthesis)
+    renderChildren()
+    updatePagination()
   } else {
     // VALUE
     let valueType = null

@@ -39,6 +39,27 @@ describe("DataRow", () => {
     root.appendChild(row.element)
     expect(root.querySelectorAll(".data-row").length).toBe(5)
   })
+  it("should paginate array children and preserve their indexes", () => {
+    const root = document.createElement("div")
+    const row = new DataRow({
+      key: "items",
+      value: [{ name: "A" }, { name: "B" }, { name: "C" }],
+      expanded: true,
+      arrayPageSize: 2,
+    })
+    root.appendChild(row.element)
+
+    expect(row.element.querySelectorAll(":scope > .data-row").length).toBe(2)
+    expect(row.element.querySelector('[data-key="0"]')).toBeDefined()
+    expect(row.element.querySelector('[data-key="1"]')).toBeDefined()
+
+    row.element.querySelector(".inline-pagination-controls button:last-child").click()
+
+    expect(row.element.querySelectorAll(":scope > .data-row").length).toBe(1)
+    expect(row.element.querySelector('[data-key="2"]')).toBeDefined()
+    expect(row.element.querySelector('[data-key="0"]')).toBeNull()
+    expect(row.element.querySelector(".page-indicator").textContent).toContain("Page 2/2")
+  })
   it("should add the class expanded to the row node if expanded is true", () => {
     const row = new DataRow({ expanded: true })
     expect(row.element.classList.contains("expanded")).toBe(true)
